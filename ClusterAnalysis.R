@@ -172,7 +172,8 @@ oto_clust1sub_merged <- merge(oto_data,clusters1sub,by="sample")
 oto_clust23_merged <- merge(oto_data,clusters23,by="sample")
 oto_Allclust_merged <- merge(oto_data,Allclusters,by="sample")
 
-#write.csv(Allclusters, file = 'Data/MillDeerClusters.csv',row.names = FALSE)
+# Save clustering analysis results for use in MasterCode.R
+write.csv(Allclusters, file = 'Data/MillDeerClusters.csv',row.names = FALSE)
 
 C1 <- ggplot()+ 
   geom_line(data=oto_clust1sub_merged,aes(distance,otoSr,group=sample,colour=reartype))+ 
@@ -209,10 +210,16 @@ C3 <- ggplot()+
 
 C3
 
-# Figure S1
+### Supplemental Material Figure S1
+
 S1 <- ggarrange(C1,C2,C3,
-          labels = c("a","b","c"),
-          font.label=list(size = 25,color="black"),
-          nrow=3)
+                labels = c("a","b","c"),
+                font.label=list(size = 25,color="black"),
+                nrow=3)
+
+png("Figures/FigureS1.png", 
+    family = "sans serif", width = 5, height=9, units = "in", res =300)
 
 S1
+
+dev.off()

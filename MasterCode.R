@@ -221,7 +221,12 @@ p1 <- ggarrange(nrow=3,profile1, profile2,profile3,
           labels = c("a","b","c"),
           font.label=list(size = 30,color="black"))
 
-p1 
+png("Figures/Figure1.png", 
+    family = "sans serif", width =9, height= 18, units = "in", res =200)
+
+p1
+
+dev.off()
 
 #----------------------------------------------------------------------#
 # Otolith radius (OR) distance at Natal and Freshwater Exit Estimation #
@@ -409,9 +414,15 @@ p2 <- ggarrange(p2a, p2b,
           labels = c("a", "b"),
            font.label=list(size = 25,color="black"))
 
+png("Figures/Figure2.png", 
+    family = "sans serif", width = 9, height= 4, units = "in", res =200)
+
 p2
 
+dev.off()
+
 ### Paper figure 3
+# Combine natal and freshwater exit dataframes
 NatalFW_data <- merge(NatalExitdata_complete,FWExitdata_complete,by=c("sample","reartype"))
 
 NatalFWdata_ridge <- melt(NatalFW_data, id.vars = "year",
@@ -465,13 +476,19 @@ p3 <- cowplot::plot_grid(p3a+theme(legend.position="top"),
                 nrow=1,
                 rel_widths = c(0.6,1))
 
+png("Figures/Figure3.png", 
+    family = "sans serif", width = 10, height= 6, units = "in", res =200)
+
 p3
+
+dev.off()
+
 
 #---------------------------#
 # Increment Growth Analysis #
 #---------------------------#
 
-# Consider 15 days rearing time period ----------------------------------------------------------
+# Growth analysis on the first 15 and 30 rearing days after emergence ----------------------------------------------------------
 
 ### Assign rearing locations to increment data 
 GrowthData <- merge(Incdata ,NatalExitdata_complete,by=c('sample','year','watershed'))
@@ -484,7 +501,7 @@ GrowthData_final <- GrowthData %>%
   mutate(Habitat = ifelse(inc_num <= NatalExit_IncNum, 'Trib', 'Non-Trib')) %>%
   ungroup()
 
-### Look at growth during the first 15 or 30 days 
+### Estimate growth during the first 15 or 30 days after emergence
 growth15 <- GrowthData_final %>% filter(inc_num < 16)
 growth15$year <- as.factor(growth15$year)
 
@@ -590,8 +607,15 @@ p4 <- ggarrange(p4a,p4b, labels = c("a", "b"),
           font.label=list(size = 35,color="black"),
           common.legend =FALSE, legend = "right")
 
+
+png("Figures/Figure4.png", 
+    family = "sans serif", width = 13, height= 18, units = "in", res =300)
+
 p4
 
+dev.off()
+
+### Supp Material figure S3
 
 pS3a <- ggplot(data=growth30_avg[-which(growth30_avg$Strat=='EarlyOutmigrant'),],
              aes(x=inc_exit,y=mean_growth)) + 
@@ -631,12 +655,17 @@ pS3 <- ggarrange(pS3a, pS3b, labels = c("a", "b"),
           common.legend = FALSE, legend = "right",
           nrow=2)
 
+png("Figures/FigureS3.png", 
+    family = "sans serif", width = 13, height= 18, units = "in", res =300)
+
 pS3
 
+dev.off()
 
-#------------------------------#
-# Rotary Screw Trap (RST) data #
-#------------------------------#
+
+#-----------------------------------------#
+# Rotary Screw Trap (RST) data  from CDFW #
+#-----------------------------------------#
 
 # Identify rearing strategies in RST data ---------------------------------------------------
 
@@ -677,13 +706,13 @@ pRST <- ggplot(RSTdata,aes(x=factor(MonthDay,levels = date_ord),
 pRST
 
 
-#------------------------------#
-# Fork Length (FL) calculation #
-#------------------------------#
+#----------------------------------------#
+# Fish Fork Length (FL) back-calculation #
+#----------------------------------------#
 
 # Calculation of FL at natal and FW exit based on OR ------------------------------------------------
 
-### Brokenstick FL calibration model
+### Broken stick FL calibration model
 calib = read.csv("Data/OR_FL_FINALforR.csv")
 calib = subset(calib, select=c("Sample_ID","OR","FL"))
 FL <- calib$FL; OR <- calib$OR
@@ -813,6 +842,12 @@ pS2 <- ggarrange(ggarrange(ggExtra::ggMarginal(pRST,type = 'density',adjust = 4,
                            font.label=list(size =25,color="black")),
                  nrow=4)
 
+png("Figures/FigureS2.png", 
+    family = "sans serif", width = 12, height= 20, units = "in", res =200)
+
 pS2
+
+dev.off()
+
 
 
