@@ -41,7 +41,7 @@ The clustering analysis code will produce the data and figure listed below:
     
 STEP III: Run the otolith analyses.
 
-The otolith analysis code will produce the figures listed below:
+The otolith analysis code will perform the Mill and Deer Creek spring-run Chinook Salmon otolith isotope and early life growth analyses presented in the paper and produce the figures listed below:
 
     Figures
     Figure1.png - Spring-run Chinook salmon life history diversity
