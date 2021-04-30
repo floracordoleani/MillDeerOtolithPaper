@@ -18,13 +18,24 @@ Follow these steps to download software, model input files, additional code, and
         MasterCode.R - this is the main analysis script.
         ClusterAnalysis.R - this script contains all the model functions and is sourced from the model script.
 
-    data
-        .csv - 
-        .csv - 
+    Data.in
+        MillDeerIncrements.csv - 
+        MillDeerNatalExit.csv - 
+        MillDeerOtoliths.csv -
+        OR_FL_FINALforR.csv -
+        RSTChinMillDeer.csv - 
 
     Create a new R project in RStudio.
 
 STEP II: Run the clustering analysis.
 
-STEP III: 
+The clustering analysis code will produce the data and figure listed below:
+
+    Data.out
+    MillDeerClusters.csv - 
+
+    Figures
+    FigureS1.png - 
+    
+STEP III: Run the otolith analyses.
 
