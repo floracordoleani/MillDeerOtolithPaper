@@ -1,6 +1,6 @@
 # MillDeerOtolithPaper
 
-This repository provides the data and R codes used to perform the spring-run Chinook otolith analyses and to produce the figures presented in the manuscript "Threatened salmon rely on a rare life history strategy in a modified and warming landscape".
+This repository provides the data and R codes used to perform the spring-run Chinook otolith analyses and to produce most of the figures presented in the manuscript "Threatened salmon rely on a rare life history strategy in a modified and warming landscape".
 
 Authors: Flora Cordoleani, Corey C. Phillis, Anna Sturrock, Alyssa M. FitzGerald, George Whitman, Anthony Malkassian, Peter K. Weber, and Rachel C. Johnson.
 
