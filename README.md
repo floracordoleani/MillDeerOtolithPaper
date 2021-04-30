@@ -39,3 +39,13 @@ The clustering analysis code will produce the data and figure listed below:
     
 STEP III: Run the otolith analyses.
 
+The otolith analysis code will produce the figures listed below:
+
+    Figures
+    Figure1.png - 
+    Figure2.png - 
+    Figure3.png - 
+    Figure4.png - 
+    FigureS2.png - 
+    FigureS3.png - 
+
