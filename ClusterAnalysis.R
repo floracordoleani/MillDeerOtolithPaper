@@ -24,7 +24,7 @@ spline.fun = function(x, xvar, yvar, ...) {
 
 df <- 10 ##This value controls the "wigglyness" of the spline. Higher values of df (degrees of freedom) will make a wigglier curve that more closely matches the data. Lower values are a more smoothed fit. 
 
-oto_data <- read.csv('Data/MillDeerOtoliths.csv',stringsAsFactors = FALSE)
+oto_data <- read.csv('Data.in/MillDeerOtoliths.csv',stringsAsFactors = FALSE)
 oto_data <- oto_data[complete.cases(oto_data),]
 oto_data_list <- oto_data %>% split(f = oto_data$sample) 
 oto_data_list <- unique(oto_data_list)
@@ -174,7 +174,7 @@ oto_clust23_merged <- merge(oto_data,clusters23,by="sample")
 oto_Allclust_merged <- merge(oto_data,Allclusters,by="sample")
 
 # Save clustering analysis results for use in MasterCode.R
-write.csv(Allclusters, file = 'Data/MillDeerClusters.csv',row.names = FALSE)
+write.csv(Allclusters, file = 'Data.out/MillDeerClusters.csv',row.names = FALSE)
 
 C1 <- ggplot()+ 
   geom_line(data=oto_clust1sub_merged,aes(distance,otoSr,group=sample,colour=reartype))+ 
