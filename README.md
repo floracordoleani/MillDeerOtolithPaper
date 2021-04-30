@@ -29,7 +29,7 @@ Follow these steps to download software, model input files, additional code, and
 
     Create a new R project in RStudio.
 
-STEP II: Run the ClusterAnalysis.R
+STEP II: Run ClusterAnalysis.R 
 
 The clustering analysis code will produce the data and figure listed below:
 
