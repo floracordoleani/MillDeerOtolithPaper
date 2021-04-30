@@ -29,7 +29,7 @@ Follow these steps to download software, model input files, additional code, and
 
     Create a new R project in RStudio.
 
-STEP II: Run the clustering analysis.
+STEP II: Run the ClusterAnalysis.R
 
 The clustering analysis code will produce the data and figure listed below:
 
@@ -39,9 +39,9 @@ The clustering analysis code will produce the data and figure listed below:
     Figures
     FigureS1.png - Strontium profile groups as identified by the clustering analysis 
     
-STEP III: Run the otolith analyses.
+STEP III: Run MasterCode.R
 
-The otolith analysis code will perform the Mill and Deer Creek spring-run Chinook Salmon otolith isotope and early life growth analyses presented in the paper and produce the figures listed below:
+The master code will perform the Mill and Deer Creek spring-run Chinook Salmon otolith isotope and early life growth analyses presented in the paper and produce the figures listed below:
 
     Figures
     Figure1.png - Spring-run Chinook salmon life history diversity
