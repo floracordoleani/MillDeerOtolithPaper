@@ -47,8 +47,8 @@ move.size <- function(x,Threshold_Sr8786){ # Function used to look at natal and 
 # Sr profile figure ----------------------------------------------------------------------
 
 ### Read data files
-Otodata <- read.csv('Data/MillDeerOtoliths.csv',stringsAsFactors = FALSE)
-Clusterdata <- read.csv('Data/MillDeerClusters.csv',stringsAsFactors = FALSE)
+Otodata <- read.csv('Data.in/MillDeerOtoliths.csv',stringsAsFactors = FALSE)
+Clusterdata <- read.csv('Data.out/MillDeerClusters.csv',stringsAsFactors = FALSE)
 
 Otodata_complete <- merge(Otodata,Clusterdata,by="sample")
 
@@ -235,8 +235,8 @@ dev.off()
 # OR distance at Natal Exit ---------------------------------------------------------------------
 
 ### Read data files
-NatalExitdata <- read.csv('Data/MillDeerNatalExit.csv',stringsAsFactors = FALSE) # Natal exit OR distance determined visually 
-Incdata <- read.csv('Data/MillDeerIncrements.csv',stringsAsFactors = FALSE)
+NatalExitdata <- read.csv('Data.in/MillDeerNatalExit.csv',stringsAsFactors = FALSE) # Natal exit OR distance determined visually 
+Incdata <- read.csv('Data.in/MillDeerIncrements.csv',stringsAsFactors = FALSE)
 
 ###  Estimate OR distance at natal exit
 SacRiverThreshold <- 0.7046338 # Strontium threshold value used for the Sacramento River
@@ -669,7 +669,7 @@ dev.off()
 
 # Identify rearing strategies in RST data ---------------------------------------------------
 
-RSTdata <- read.csv('Data/RSTChinMillDeer.csv',header=T)
+RSTdata <- read.csv('Data.in/RSTChinMillDeer.csv',header=T)
 
 RSTdata$MonthDay <-format(as.Date(RSTdata$Date), format="%m-%d")
 RSTdata  <- RSTdata %>%
@@ -713,7 +713,7 @@ pRST
 # Calculation of FL at natal and FW exit based on OR ------------------------------------------------
 
 ### Broken stick FL calibration model
-calib = read.csv("Data/OR_FL_FINALforR.csv")
+calib = read.csv("Data.in/OR_FL_FINALforR.csv")
 calib = subset(calib, select=c("Sample_ID","OR","FL"))
 FL <- calib$FL; OR <- calib$OR
 forced.intercept <- 30

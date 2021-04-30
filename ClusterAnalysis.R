@@ -5,6 +5,7 @@
 
 ### Code written by Anthony Malkassian and Flora Cordoleani 
 ### Use of clustering analysis to quantify Mill/Deer Creek juvenile life history strategies
+
 # Load libraries needed to run this script
 library(fda)
 library(mclust)
