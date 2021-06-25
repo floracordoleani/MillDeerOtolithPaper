@@ -145,7 +145,7 @@ plot(clus, what = "classification")
 
 plot(clus, what = "uncertainty")
 
-# Cluster Plots -------------------------------------------------------------------
+# Cluster Figures -------------------------------------------------------------------
 ### Assign each fish to associated cluster
 FishID <- unique(oto_data$sample)
 EarlyOutmigrant_ID <- FishID[which(clus1$classification==1)]
@@ -211,7 +211,7 @@ C3 <- ggplot()+
 
 C3
 
-### Supplemental Material Figure S1
+### Supplementary Information Figure S1
 
 S1 <- ggarrange(C1,C2,C3,
                 labels = c("a","b","c"),
