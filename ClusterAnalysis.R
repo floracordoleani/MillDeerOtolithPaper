@@ -73,7 +73,7 @@ mabase=create.bspline.basis(c(0,1000),nbasis=50)
 tfd=Data2fd(x_vec,t(predicted_Sr),basisobj=mabase)
 tfdcut=Data2fd(x_vec[200:400],t(predicted_Sr)[200:400,],basisobj=mabasecut)
 
-# Clustering analysis; step 1: focus on the 200 - 400 Sr profile zone ----------------------------------
+# Clustering analysis; step 1: focus on the 0 - 400 Sr profile zone ----------------------------------
 
 ## Apply functionnal pca to tfdcut object 
 ## (cf pca.fd() doc https://cran.r-project.org/web/packages/fda/fda.pdf p181)
@@ -84,7 +84,7 @@ tfpca$values
 #proportion of variance explained by each eigenfunction
 tfpca$varprop
 
-#we keep only 3 harmonics regarding the proportion of variance explained by the first two eigenfunction
+#we keep only 3 harmonics regarding the proportion of variance explained by the first three eigenfunction
 fpca=pca.fd(tfdcut,3)
 
 #plot functionnal PCA
@@ -94,15 +94,15 @@ plot(fpca)
 plot(fpca$harmonics)
 
 ## Then apply model based clustering with differents models (VVV, VEV, etc...)
-##cf doc https://cran.r-project.org/web/packages/mclust/mclust.pdf p93)
+##cf doc https://cran.r-project.org/web/packages/mclust/mclust.pdf p107
+
 clus1 <- Mclust(fpca$scores)
 
-#summary function shows optimal clustering with VVE model with 4 components
+#summary function shows optimal clustering with VEE (ellipsoidal, equal shape and orientation) model with 2 components:
 summary(clus1,parameters = TRUE)
 
-## best model given : Mclust EEE (ellipsoidal, equal volume, shape and orientation) model with 2 components:
 #BIC or Bayesian Information Criterion for the specified mixture models and numbers of clusters
-plot(clus1, what = "BIC")  # optimal clustering found for model VVV with 3 clusters
+plot(clus1, what = "BIC")  # optimal clustering found for model VEE with 3 clusters
 
 plot(clus1, what = "classification")
 
@@ -135,7 +135,7 @@ plot(fpca$harmonics)
 ## Apply model based clustering on the remaining two population subset
 clus <- Mclust(fpca$scores)
 
-#summary function shows optimal clustering with EEV (ellipsoidal, equal volume and shape) model with 3 components:
+#summary function shows optimal clustering with E (univariate, equal variance) model with 2 components:
 summary(clus,parameters = TRUE)
 
 #BIC or Bayesian Information Criterion for the specified mixture models and numbers of clusters
@@ -154,7 +154,7 @@ IntermediateOutmigrant_ID <- Other_ID[which(clus$classification==2)]
 LateOutmigrant_ID <- Other_ID[which(clus$classification==1)]
 
 cluster1 <- data.frame(sample = EarlyOutmigrant_ID) %>% 
-            mutate(reartype ='EarlyOutmigrant')
+  mutate(reartype ='EarlyOutmigrant')
 
 cluster2 <- data.frame(sample = IntermediateOutmigrant_ID) %>% 
   mutate(reartype ='IntermediateOutmigrant')
