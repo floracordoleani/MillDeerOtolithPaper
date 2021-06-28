@@ -498,12 +498,12 @@ NatalFW_data <- merge(NatalExitdata_complete,FWExitdata_complete,by=c("sample","
 
 # Add corresponding emigrations years for each adult return year
 NatalFW_data <- NatalFW_data %>% 
-                 mutate(emigyear = case_when(year == 2007 ~ "2004-2005", 
-                                             year == 2008 ~ "2005-2006",
-                                             year == 2012 ~ "2009-2010",
-                                             year == 2013 ~ "2010-2011",
+                mutate(emigyear = case_when( year == 2018 ~ "2015-2016",
                                              year == 2014 ~ "2011-2012",
-                                             year == 2018 ~ "2015-2016"))
+                                             year == 2013 ~ "2010-2011",
+                                             year == 2012 ~ "2009-2010",
+                                             year == 2008 ~ "2005-2006",
+                                             year == 2007 ~ "2004-2005"))
 
 # Prepare data for figure 3a
 years_labels <- c('2004-2005'=" RY 2007\n (EY 2004 & 2005)",
@@ -513,17 +513,18 @@ years_labels <- c('2004-2005'=" RY 2007\n (EY 2004 & 2005)",
                   '2011-2012'= " RY 2014\n (EY 2011 & 2012)",
                   '2015-2016'=" RY 2018\n (EY 2015 & 2016)")
 
-NatalFWdata_density <- melt(NatalFW_data, id.vars = "emigyear", 
-                          measure.vars = c("NatalExit_OR_final", "FWExit_OR_estimated"))
+NatalFW_data$emigyear <- factor(NatalFW_data$emigyear,levels=c("2015-2016", "2011-2012",
+                                                               "2010-2011","2009-2010",
+                                                               "2005-2006","2004-2005"))
 
 p3a <- ggplot(data=NatalFW_data)+ 
   geom_density(aes(x =FWExit_OR_estimated,group=emigyear,
                    color="#00A6D7", fill= "#00A6D7"),
                alpha=0.3,adjust=0.9,size=1)+
   geom_density(aes(x =NatalExit_OR_final,group=emigyear,
-               color="#001B87", fill= "#001B87"), 
+                   color="#001B87", fill= "#001B87"), 
                alpha=0.3,adjust=0.7,size=1)+ 
-  facet_grid(rev(levels(as.factor(emigyear)))~.,scales='free_y',switch="y",labeller = labeller(emigyear=years_labels)) + 
+  facet_grid(emigyear~.,scales='free_y',switch="y",labeller = labeller(emigyear=years_labels)) + 
   scale_x_continuous(limits=c(50,1000), breaks=seq(100,1000,200),expand = c(0,0))+
   labs(x=(expression(paste('Otolith radius (',mu,'m)',sep = ''))))+ ylab("")+ 
   scale_y_discrete(labels=years_labels,expand = c(0,0))+
@@ -536,7 +537,8 @@ p3a <- ggplot(data=NatalFW_data)+
         axis.text.y =element_text(size=16),
         strip.background =element_rect(fill="white"),
         strip.text.y.left = element_text(angle = 0),
-        panel.background = element_blank())
+        panel.background = element_blank(),
+        panel.spacing=unit(1, "lines"))
 
 p3a
 
@@ -544,13 +546,13 @@ p3a
 # Prepare data for figure 3b
 NatalFWdata_cast = dcast(NatalFW_data, emigyear ~ reartype, fun.aggregate = length)
 NatalFWdata_melt = melt(NatalFWdata_cast, id.vars = "emigyear",
-                measure.vars = c("EarlyOutmigrant", "IntermediateOutmigrant","LateOutmigrant"))
+                        measure.vars = c("EarlyOutmigrant", "IntermediateOutmigrant","LateOutmigrant"))
 
 p3b <- ggplot(NatalFWdata_melt, aes(x =as.factor(emigyear),y = value, fill = variable)) + 
   geom_bar(stat = "identity" ,alpha=0.6,width = 10,
            position="stack")+
   labs(y = "Number of recovered otoliths", x="") +
-  facet_grid(as.factor(emigyear)~.) + #(rev(levels(as.factor(emigyear)))~.) + 
+  facet_grid(as.factor(emigyear)~.) + 
   coord_flip()+
   theme(strip.background =element_rect(fill="white"),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
