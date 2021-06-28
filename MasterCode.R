@@ -11,6 +11,7 @@ library(ggpubr)
 library(reshape2)
 library(ggridges)
 library(wesanderson)
+library(car)
 
 
 # Load function
@@ -44,7 +45,7 @@ move.size <- function(x,Threshold_Sr8786){ # Function used to look at natal and 
 # Strontium (Sr) Profile Analysis #
 #---------------------------------#
 
-# Sr profile figure ----------------------------------------------------------------------
+# Sr profile figure (Paper figure 1) ----------------------------------------------------------------------
 
 ### Read data files
 Otodata <- read.csv('Data.in/MillDeerOtoliths.csv',stringsAsFactors = FALSE)
@@ -215,7 +216,7 @@ profile3 <- ggplot() +
 
 profile3
 
-### Paper figure 1
+### Combine profiles
 
 p1 <- ggarrange(nrow=3,profile1, profile2,profile3,
           labels = c("a","b","c"),
@@ -285,12 +286,20 @@ propstrategy.summary <- strategy.summary %>% group_by(reartype) %>%
 # Evaluating OR mean and sd at natal exit for each rearing strategy
 NatalOR.summary <- NatalExitdata_complete %>% group_by(reartype) %>% 
                    dplyr::summarise(Mean =round(mean(NatalExit_OR_final, na.rm=TRUE)),
+                                    Min =round(min(NatalExit_OR_final, na.rm=TRUE)),
+                                    Max =round(max(NatalExit_OR_final, na.rm=TRUE)),
                                     Sd = round(sd(NatalExit_OR_final, na.rm=TRUE)))
 
 # Evaluating mean and sd increment number (=number of day) at natal exit for each rearing strategy
 NatalInc.summary <- NatalExitdata_complete %>% group_by(reartype) %>% 
                     dplyr::summarise(Mean = round(mean(NatalExit_IncNum, na.rm=TRUE)),
+                                     Min = round(min(NatalExit_IncNum, na.rm=TRUE)),
+                                     Max = round(max(NatalExit_IncNum, na.rm=TRUE)),
                                      Sd = round(sd(NatalExit_IncNum, na.rm=TRUE)))
+
+# Levene test for testing homogeneity of data
+leveneTest(NatalExit_OR_final~ reartype*as.factor(year), data =NatalExitdata_complete)
+leveneTest(NatalExit_IncNum ~ reartype*as.factor(year), data =NatalExitdata_complete)
 
 # Anova test
 res.aov.NatalOR <- aov(NatalExit_OR_final ~ reartype , data = NatalExitdata_complete)
@@ -342,7 +351,8 @@ for (i in 1:length(FishID)){
   } else FWExitdata$FWExit_IncNum[i] <- 'NA' # Microchemistry not performed
 }
 
-FWExitdata_complete <- merge(x=FWExitdata,y=Clusterdata,by="sample")
+FWExitdata_complete <- merge(x=FWExitdata,y=NatalExitdata_complete[,c('sample','year')],by="sample")
+FWExitdata_complete <- merge(x=FWExitdata_complete,y=Clusterdata,by="sample")
 
 # Change object category for future analysis
 FWExitdata_complete$reartype <- as.factor(FWExitdata_complete$reartype)
@@ -357,6 +367,10 @@ FWOR.summary <- FWExitdata_complete %>% group_by(reartype) %>%
 FWIncNum.summary <- FWExitdata_complete %>% group_by(reartype) %>% 
                     dplyr::summarise(Mean = round(mean(FWExit_IncNum, na.rm=TRUE)),
                                      Sd = round(sd(FWExit_IncNum, na.rm=TRUE)))
+
+# Levene test for testing homogeneity of data
+leveneTest(FWExit_OR_estimated~ reartype*as.factor(year), data =FWExitdata_complete)
+leveneTest(FWExit_IncNum ~ reartype*as.factor(year), data =FWExitdata_complete)
 
 # Anova test
 res.aov.FWOR <- aov(FWExit_OR_estimated ~ reartype, data = FWExitdata_complete)
@@ -373,9 +387,61 @@ plot(tukey.res.FWOR)
 tukey.res.FWinc <- TukeyHSD(res.aov.FWinc)
 plot(tukey.res.FWinc)
 
-# Natal & FW Exit density figures --------------------------------------------------------------
 
-### Paper Figure 2
+#-----------------------------------------#
+# Rotary Screw Trap (RST) data  from CDFW #
+#-----------------------------------------#
+
+# Identify rearing strategies in RST data ---------------------------------------------------
+
+RSTdata <- read.csv('Data.in/RSTChinMillDeer.csv',header=T)
+
+RSTdata$MonthDay <-format(as.Date(RSTdata$Date), format="%m-%d")
+RSTdata  <- RSTdata %>%
+  mutate(Type = case_when(Month > 9 & Length > 50 |
+                            Month <= 2 & Length > 60 |
+                            Month == 3 & Length > 76 |
+                            Month == 4 & Day >= 1 & Day <15 & Length > 85 |
+                            Month == 4 & Day >= 15 & Day <30 & Length > 95 |
+                            Month >= 4 & Month < 7 & Length > 100 ~ 'Yearling',
+                          Month >= 1 & Month < 3 & Length > 45 & Length <= 60 |
+                            Month >= 3 & Month < 7 & Length > 45 & Length <= 100  ~ 'Smolt',
+                          Month > 10 & Length <= 45 |
+                            Month <= 6 & Length <= 45  ~ 'Fry'))
+
+# Sample size estimate for each defined life history strategy
+RST.summary <- RSTdata %>% group_by(Type) %>% 
+  dplyr::summarise(count=n())
+
+
+# Plot RST data grouped by strategy ----------------------------------------------------------------------
+# RST data summarized by month and day
+date_ord <-  seq(as.Date("2001-10-01"), as.Date("2002-07-30"), by="days")
+date_ord <- format(date_ord, format="%m-%d")
+
+
+pRST <- ggplot(RSTdata,aes(x=factor(MonthDay,levels = date_ord),
+                           y=Length, colour = Type))+
+  geom_point(alpha=0.2)+xlab("")+ylab("Length (mm)")+theme_bw()+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+  scale_x_discrete(breaks=c("10-03","11-01" ,"12-01","01-01","02-01","03-01","04-01","05-01","06-01"),
+                   labels=c("October","November","December","January","February","March", "April","May","June"))+
+  scale_y_continuous(breaks=seq(20,160,20),limits = c(20, 150))+
+  theme(axis.text.x = element_text(angle=45, hjust = 1),
+        text = element_text(size=25),
+        legend.position = "none")+
+  scale_color_manual(values = wes_palette("Darjeeling1", n = 3))
+
+pRST
+
+
+#---------------------------------------------------#
+# Fish size at Natal and FW exit manuscript figures #
+#---------------------------------------------------#
+
+# Migrant size distributions at natal and freshwater exit (Paper Figure 2) --------------------------------------------------------------
+
 p2a <- ggplot(NatalExitdata_complete)+
   geom_density(aes(x=NatalExit_OR_final,y=..count../sum(..count..),
                    fill = reartype,color=reartype),alpha=0.3,size=1) +
@@ -410,78 +476,118 @@ p2b <- ggplot(FWExitdata_complete)+
 
 p2b
 
-p2 <- ggarrange(p2a, p2b, 
-          labels = c("a", "b"),
-           font.label=list(size = 25,color="black"))
+
+p2 <- ggarrange(ggarrange(ggExtra::ggMarginal(pRST,type = 'density',adjust = 4,margins = 'y',
+                                                  groupColour = TRUE, groupFill = TRUE),
+                              font.label=list(size =25,color="black"),labels ='a'),
+                    ggarrange(p2a,p2b, font.label=list(size =25,color="black"),
+                              labels = c("b", "c")),
+                    nrow=2)
+
 
 png("Figures/Figure2.png", 
-    family = "sans serif", width = 9, height= 4, units = "in", res =200)
+    family = "sans serif", width = 10, height= 10, units = "in", res =200)
 
 p2
 
 dev.off()
 
-### Paper figure 3
+# Migrant sizes and life history diversity across years (Paper figure 3) -----------------------------------------------------------------
 # Combine natal and freshwater exit dataframes
-NatalFW_data <- merge(NatalExitdata_complete,FWExitdata_complete,by=c("sample","reartype"))
+NatalFW_data <- merge(NatalExitdata_complete,FWExitdata_complete,by=c("sample","reartype","year"))
 
-NatalFWdata_ridge <- melt(NatalFW_data, id.vars = "year",
-                 measure.vars = c("NatalExit_OR_final", "FWExit_OR_estimated"))
+# Add corresponding emigrations years for each adult return year
+NatalFW_data <- NatalFW_data %>% 
+                 mutate(emigyear = case_when(year == 2007 ~ "2004-2005", 
+                                             year == 2008 ~ "2005-2006",
+                                             year == 2012 ~ "2009-2010",
+                                             year == 2013 ~ "2010-2011",
+                                             year == 2014 ~ "2011-2012",
+                                             year == 2018 ~ "2015-2016"))
 
-p3a <- ggplot(NatalFWdata_ridge,aes(x = value,y=forcats::fct_rev(as.factor(year)),color = variable, 
-                                 point_color = variable, fill = variable))+ 
-  geom_density_ridges(alpha=0.3,adjust=0.8,size=1,scale = .95)+ 
+# Prepare data for figure 3a
+years_labels <- c('2004-2005'=" RY 2007\n (EY 2004 & 2005)",
+                  '2005-2006'=" RY 2008\n (EY 2005 & 2006)",
+                  '2009-2010'=" RY 2012\n (EY 2009 & 2010)",
+                  '2010-2011'=" RY 2013\n (EY 2010 & 2011)",
+                  '2011-2012'= " RY 2014\n (EY 2011 & 2012)",
+                  '2015-2016'=" RY 2018\n (EY 2015 & 2016)")
+
+NatalFWdata_density <- melt(NatalFW_data, id.vars = "emigyear", 
+                          measure.vars = c("NatalExit_OR_final", "FWExit_OR_estimated"))
+
+p3a <- ggplot(data=NatalFW_data)+ 
+  geom_density(aes(x =FWExit_OR_estimated,group=emigyear,
+                   color="#00A6D7", fill= "#00A6D7"),
+               alpha=0.3,adjust=0.9,size=1)+
+  geom_density(aes(x =NatalExit_OR_final,group=emigyear,
+               color="#001B87", fill= "#001B87"), 
+               alpha=0.3,adjust=0.7,size=1)+ 
+  facet_grid(rev(levels(as.factor(emigyear)))~.,scales='free_y',switch="y",labeller = labeller(emigyear=years_labels)) + 
   scale_x_continuous(limits=c(50,1000), breaks=seq(100,1000,200),expand = c(0,0))+
-  scale_y_discrete(expand = c(0,0)) +
   labs(x=(expression(paste('Otolith radius (',mu,'m)',sep = ''))))+ ylab("")+ 
+  scale_y_discrete(labels=years_labels,expand = c(0,0))+
   scale_fill_manual(values = c("#001B87", "#00A6D7"), labels = c("Natal", "Freshwater"),name="") +
   scale_color_manual(values = c("#001B87", "#00A6D7"), guide = "none") +
-  scale_discrete_manual("point_color", values = c("#001B87", "#00A6D7"), guide = "none") +
-  coord_cartesian(clip = "off") +
   guides(fill = guide_legend(override.aes = list(fill = c("#001B87", "#00A6D7"),
-         color = NA, point_color = NA))) +
-  theme_ridges(center = TRUE)+
+                                                 color = NA))) +
   theme(text = element_text(size=20),
         axis.text.x = element_text(size=16),
-        axis.text.y =element_text(size=16))
+        axis.text.y =element_text(size=16),
+        strip.background =element_rect(fill="white"),
+        strip.text.y.left = element_text(angle = 0),
+        panel.background = element_blank())
 
-p3a 
+p3a
 
 
-NatalFWdata_cast = dcast(NatalFW_data, year ~ reartype, fun.aggregate = length)
-NatalFWdata_melt = melt(NatalFWdata_cast, id.vars = "year",
+# Prepare data for figure 3b
+NatalFWdata_cast = dcast(NatalFW_data, emigyear ~ reartype, fun.aggregate = length)
+NatalFWdata_melt = melt(NatalFWdata_cast, id.vars = "emigyear",
                 measure.vars = c("EarlyOutmigrant", "IntermediateOutmigrant","LateOutmigrant"))
 
-p3b <- ggplot(NatalFWdata_melt, aes(x = as.factor(year),y = value, fill = variable)) + 
-              geom_bar(stat = "identity" ,alpha=0.6,width = 12,position="stack")+
-       labs(y = "Number of recovered otoliths", x="") +
-       facet_grid(year~.,switch="y") +
-       coord_flip()+
-       theme(strip.background =element_rect(fill="white"),
-             panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-             panel.background = element_blank(), axis.line = element_line(colour = "black"),
-             axis.text.y=element_blank(),
-             axis.ticks.y=element_blank(),
-             text = element_text(size=20),
-             legend.title = element_blank())+
-       scale_fill_manual(values = wes_palette("Darjeeling1",n=3),
-                         labels = c("Early", "Intermediate", "Late"))
+p3b <- ggplot(NatalFWdata_melt, aes(x =as.factor(emigyear),y = value, fill = variable)) + 
+  geom_bar(stat = "identity" ,alpha=0.6,width = 10,
+           position="stack")+
+  labs(y = "Number of recovered otoliths", x="") +
+  facet_grid(as.factor(emigyear)~.) + #(rev(levels(as.factor(emigyear)))~.) + 
+  coord_flip()+
+  theme(strip.background =element_rect(fill="white"),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        text = element_text(size=20),
+        axis.text.x = element_text(size=16),
+        strip.text.y= element_blank(),
+        panel.spacing.y = unit(0, "null"),
+        legend.title = element_blank(),
+        legend.position="top")+
+  scale_fill_manual(values = wes_palette("Darjeeling1",n=3),
+                    labels = c("Early", "Intermediate","Late"),
+                    guide = guide_legend(reverse = TRUE))
 
 p3b
 
+# Combine figures 3a and 3b
 
 p3 <- cowplot::plot_grid(p3a+theme(legend.position="top"),
                 p3b+ theme(legend.position="top"), 
                 labels = c('a', 'b'), label_size = 20,
                 nrow=1,
-                rel_widths = c(0.6,1))
+                rel_widths = c(0.8,1))
+
+p3
+
+
 
 png("Figures/Figure3.png", 
-    family = "sans serif", width = 10, height= 6, units = "in", res =200)
+    family = "sans serif", width = 15, height= 10, units = "in", res =200)
 
 p3
 
 dev.off()
+
 
 
 #---------------------------#
@@ -531,31 +637,38 @@ growthday30 <- GrowthData_final  %>%  filter(inc_num == 30) %>%
 ### Growth statistics for manuscript 
 growthday15.summary <- growthday15 %>% group_by(reartype) %>% 
                       dplyr::summarise(Mean =round(mean(cuminc_width, na.rm=TRUE)),
-                                       Sd= round(sd(cuminc_width, na.rm=TRUE)))
+                                       Sd= round(sd(cuminc_width, na.rm=TRUE)),
+                                       count=n())
 
 growthday30.summary <- growthday30 %>% group_by(reartype) %>% 
   dplyr::summarise(Mean =round(mean(cuminc_width, na.rm=TRUE)),
-                   Sd= round(sd(cuminc_width, na.rm=TRUE)))
+                   Sd= round(sd(cuminc_width, na.rm=TRUE)),
+                   count=n())
 
+# Test of homogeneity
+growth15_avg_wyear <- merge(growth15_avg,NatalExitdata_complete,by=c('sample'))
+leveneTest(dist_exit ~ reartype *as.factor(year) , data=growth15_avg_wyear)
+leveneTest(cuminc_width~ reartype*as.factor(year), data =growthday15)
 
+growth30_avg_wyear <- merge(growth30_avg,NatalExitdata_complete,by=c('sample'))
+leveneTest(dist_exit ~ reartype *as.factor(year) , data=growth30_avg_wyear)
+leveneTest(cuminc_width~ reartype*as.factor(year), data =growthday30)
+
+#Anova
 res.aov_15 <- aov(mean_growth ~ Strat, data=growth15_avg[growth15_avg$inc_exit>=15,])
 summary(res.aov_15)
 
+#Tukey test for growth comparison during the first 15 days
 tuk15 <- TukeyHSD(res.aov_15)
 tuk15
 
 plot(tuk15)
 
+# t-test for growth comparison during the first 30 days
+datattest <- growth30_avg[-which(growth30_avg$Strat=='EarlyOutmigrant'),]
+t.test(datattest$mean_growth ~ datattest$Strat)
 
-res.aov_30 <- aov(mean_growth ~ Strat, data=growth30_avg[growth30_avg$inc_exit>=30,])
-summary(res.aov_30)
-
-tuk30 <- TukeyHSD(res.aov_30)
-tuk30
-plot(tuk30)
-
-
-### Paper figure 4
+# Early-life salmon growth across life history types (Paper Figure 4)--------------------------------
 p4a <- ggplot(data=growth15_avg[growth15_avg$inc_exit>=15,],aes(x=inc_exit,y=mean_growth)) + 
   geom_point(aes(x=inc_exit,y=mean_growth,colour=Strat),size=4)+
   geom_smooth(color = 'black',method="lm", color="black") +
@@ -585,9 +698,9 @@ sig.letters <- tuk_cumgrowth15$groups[order(row.names(tuk_cumgrowth15$groups)), 
 p4b <- ggplot(growthday15,aes(x = reartype, y = cuminc_width,fill=reartype)) +
   geom_boxplot(outlier.shape = NA,alpha=0.5,col="black")+
   geom_jitter(width=0.15,size=3,col="black")+
-  geom_text(data = value_med, aes(x=reartype, y = 23 + med_value, 
+  geom_text(data = value_med, aes(x=reartype, y = 22 + med_value, 
                                   label = sig.letters$groups,colour=reartype),
-                                  size=8, vjust=0,show.legend=FALSE)+
+                                  size=12, vjust=0,show.legend=FALSE)+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"),
         axis.text.x=element_blank(),axis.ticks.x=element_blank(),
@@ -621,7 +734,9 @@ pS3a <- ggplot(data=growth30_avg[-which(growth30_avg$Strat=='EarlyOutmigrant'),]
              aes(x=inc_exit,y=mean_growth)) + 
   geom_point(aes(x=inc_exit,y=mean_growth,colour=Strat),size=4)+ 
   geom_smooth(color = 'black',method="lm", color="black") +
-  stat_cor(p.accuracy = 0.001, r.accuracy = 0.01,label.x = 50,size=7,col="black")+
+  stat_cor(p.accuracy = 0.001, r.accuracy = 0.01, 
+           aes(label = paste(..rr.label.., ..p.label.., sep = "~`,`~")), ## rr.label for r-squared
+           label.x = 50,label.y=3.5, size=7,col="black")+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"),
         axis.text.x = element_text(angle=45, hjust = 1),
@@ -663,49 +778,6 @@ pS3
 dev.off()
 
 
-#-----------------------------------------#
-# Rotary Screw Trap (RST) data  from CDFW #
-#-----------------------------------------#
-
-# Identify rearing strategies in RST data ---------------------------------------------------
-
-RSTdata <- read.csv('Data.in/RSTChinMillDeer.csv',header=T)
-
-RSTdata$MonthDay <-format(as.Date(RSTdata$Date), format="%m-%d")
-RSTdata  <- RSTdata %>%
-            mutate(Type = case_when(Month > 9 & Length > 50 |
-                          Month <= 2 & Length > 60 |
-                          Month == 3 & Length > 76 |
-                          Month == 4 & Day >= 1 & Day <15 & Length > 85 |
-                          Month == 4 & Day >= 15 & Day <30 & Length > 95 |
-                          Month >= 4 & Month < 7 & Length > 100 ~ 'Yearling',
-                          Month >= 1 & Month < 3 & Length > 45 & Length <= 60 |
-                          Month >= 3 & Month < 7 & Length > 45 & Length <= 100  ~ 'Smolt',
-                          Month > 10 & Length <= 45 |
-                          Month <= 6 & Length <= 45  ~ 'Fry'))
-
-# Plot RST data grouped by strategy ----------------------------------------------------------------------
-# RST data summarized by month and day
-date_ord <-  seq(as.Date("2001-10-01"), as.Date("2002-07-30"), by="days")
-date_ord <- format(date_ord, format="%m-%d")
-
-
-pRST <- ggplot(RSTdata,aes(x=factor(MonthDay,levels = date_ord),
-                         y=Length, colour = Type))+
-  geom_point()+xlab("")+ylab("Length (mm)")+theme_bw()+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "black"))+
-  scale_x_discrete(breaks=c("10-03","11-01" ,"12-01","01-01","02-01","03-01","04-01","05-01","06-01"),
-                   labels=c("October","November","December","January","February","March", "April","May","June"))+
-  scale_y_continuous(breaks=seq(20,160,20),limits = c(20, 150))+
-  theme(axis.text.x = element_text(angle=45, hjust = 1),
-        text = element_text(size=25),
-        legend.position = "none")+
-  scale_color_manual(values = wes_palette("Darjeeling1", n = 3))
-
-pRST
-
-
 #----------------------------------------#
 # Fish Fork Length (FL) back-calculation #
 #----------------------------------------#
@@ -720,11 +792,12 @@ forced.intercept <- 30
 res.lm <- lm(I(FL-forced.intercept) ~ 0 + OR)
 res.bs <- segmented::segmented(res.lm, seg.Z = ~ 0 + OR)
 FL.bs <- predict(res.bs) + forced.intercept
+calib$Predict <- FL.bs 
 
 ### Application on Mill/Deer Creek population
 ORNataldata <- data.frame(OR=as.double(NatalExitdata_complete$NatalExit_OR_final))
 NatalExitdata_complete$NatalExitFL <- segmented::predict.segmented(res.bs,newdata = ORNataldata) + forced.intercept
-
+  
 ORFWdata <- data.frame(OR=as.double(FWExitdata_complete$FWExit_OR_estimated))
 FWExitdata_complete$FWExitFL <- segmented::predict.segmented(res.bs,newdata = ORFWdata) + forced.intercept
 
@@ -741,14 +814,28 @@ FWExitFL.summary <- FWExitdata_complete %>% group_by(reartype) %>%
                                      Min = round(min(FWExitFL, na.rm=TRUE)),
                                      Sd = round(sd(FWExitFL, na.rm=TRUE)))
 
-# Figure S2 for Supp Mat -------------------------------------------------------------
+# SUpplementary Information Figure S2 -------------------------------------------------------------
 
-pS2b <- ggplot() + geom_point(data = calib,aes(OR,FL),col="black")+
+pS2a <- ggplot() + geom_point(data = calib,aes(OR,FL),col="black")+
   geom_point(data=NatalExitdata_complete,aes(NatalExit_OR_final,NatalExitFL),col='red',size=2)+
+  geom_line(data=calib,aes(OR,Predict),col='blue',size=1)+
   labs(y=(expression(paste('Fork Length (mm)'))), fill="")+
-  labs(x= "Otolith radius (µm)")+
-  scale_y_continuous(limits=c(30,150),
-                     breaks=c(30,60,90,120,150))+
+  labs(x=(expression(paste('Otolith radius (',mu,'m)',sep = ''))))+
+  scale_x_continuous(limits=c(150,950),breaks=seq(150,950,200))+
+  scale_y_continuous(limits=c(30,150),breaks=c(30,60,90,120,150))+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"),
+        text = element_text(size=25),legend.title = element_blank(),
+        legend.position = "none", plot.title = element_text(face = "bold"))
+
+pS2a
+
+pS2b  <- ggplot() + geom_point(data = calib,aes(OR,FL),col="black")+
+  geom_point(data=FWExitdata_complete,aes(FWExit_OR_estimated,FWExitFL),col='red',size=2)+
+  geom_line(data=calib,aes(OR,Predict),col='blue',size=1)+
+  labs(x=(expression(paste('Otolith radius (',mu,'m)',sep = ''))),y="")+
+  scale_x_continuous(limits=c(150,950),breaks=seq(150,950,200))+
+  scale_y_continuous(limits=c(30,150),breaks=c(30,60,90,120,150))+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"),
         text = element_text(size=25),legend.title = element_blank(),
@@ -756,19 +843,8 @@ pS2b <- ggplot() + geom_point(data = calib,aes(OR,FL),col="black")+
 
 pS2b
 
-pS2c  <- ggplot() + geom_point(data = calib,aes(OR,FL),col="black")+
-  geom_point(data=FWExitdata_complete,aes(FWExit_OR_estimated,FWExitFL),col='red',size=2)+
-  labs(x= "Otolith radius (µm)",y="")+
-  scale_y_continuous(limits=c(30,150),breaks=c(30,60,90,120,150))+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "black"),
-        text = element_text(size=25),legend.title = element_blank(),
-        legend.position = "none", plot.title = element_text(face = "bold"))
 
-pS2c
-
-
-pS2d <- ggplot(NatalExitdata_complete)+
+pS2c <- ggplot(NatalExitdata_complete)+
   geom_density(aes(x= as.double(NatalExitFL),y=..count../sum(..count..),
                    fill = reartype,color=reartype),alpha=0.3,adjust=1.2, size=1)+  
   scale_x_continuous(limits=c(20,160), breaks=seq(30,150,30))+
@@ -782,9 +858,9 @@ pS2d <- ggplot(NatalExitdata_complete)+
   scale_fill_manual(values = wes_palette("Darjeeling1", n = 3))+  
   scale_color_manual(values = wes_palette("Darjeeling1", n = 3))
 
-pS2d 
+pS2c 
 
-pS2e <- ggplot(FWExitdata_complete)+
+pS2d <- ggplot(FWExitdata_complete)+
   geom_density(aes(x=as.double(FWExitFL),y=..count../sum(..count..),fill = reartype,color=reartype),
                alpha=0.3,adjust=1.2, size=1) +
   labs(x=(expression(paste('Fork Length (mm)'))), fill="",y="")+
@@ -796,10 +872,10 @@ pS2e <- ggplot(FWExitdata_complete)+
   scale_fill_manual(values = wes_palette("Darjeeling1", n = 3))+  
   scale_color_manual(values = wes_palette("Darjeeling1", n = 3))
 
-pS2e
+pS2d
 
 
-pS2f <- ggplot(NatalExitdata_complete)+
+pS2e <- ggplot(NatalExitdata_complete)+
   geom_density(aes(x=NatalExit_IncNum,y=..count../sum(..count..), 
                    fill = reartype,color=reartype),alpha=0.3,adjust=1.4,size=1) +
   scale_x_continuous(limits=c(0,300), breaks=seq(0,300,50))+
@@ -813,9 +889,9 @@ pS2f <- ggplot(NatalExitdata_complete)+
   scale_fill_manual(values = wes_palette("Darjeeling1", n = 3))+  
   scale_color_manual(values = wes_palette("Darjeeling1", n = 3))
 
-pS2f
+pS2e
 
-pS2g <- ggplot(FWExitdata_complete)+
+pS2f <- ggplot(FWExitdata_complete)+
   geom_density(aes(x=FWExit_IncNum,y=..count../sum(..count..), 
                    fill = reartype,color=reartype),alpha=0.3,adjust=1.4, size=1) +
   scale_x_continuous(limits=c(20,350), breaks=seq(50,350,50))+
@@ -828,26 +904,24 @@ pS2g <- ggplot(FWExitdata_complete)+
   scale_fill_manual(values = wes_palette("Darjeeling1", n = 3))+  
   scale_color_manual(values = wes_palette("Darjeeling1", n = 3))
 
-pS2g
+pS2f
 
 
-pS2 <- ggarrange(ggarrange(ggExtra::ggMarginal(pRST,type = 'density',adjust = 4,margins = 'y',
-                                               groupColour = TRUE, groupFill = TRUE),
-                           font.label=list(size =25,color="black"),labels ='a'),
-                 ggarrange(pS2b, pS2c, labels = c("b", "c"),
+pS2 <- ggarrange(ggarrange(pS2a, pS2b, labels = c("a", "b"),
                            font.label=list(size =25,color="black")),
-                 ggarrange(pS2d,pS2e, labels=c("d","e"),
+                 ggarrange(pS2c,pS2d, labels=c("c","d"),
                            font.label=list(size =25,color="black")),
-                 ggarrange(pS2f,pS2g, labels=c("f","g"),
+                 ggarrange(pS2e,pS2f, labels=c("e","f"),
                            font.label=list(size =25,color="black")),
-                 nrow=4)
+                 nrow=3)
+
+pS2
+
 
 png("Figures/FigureS2.png", 
-    family = "sans serif", width = 12, height= 20, units = "in", res =200)
+    family = "sans serif", width = 12, height= 14, units = "in", res =200)
 
 pS2
 
 dev.off()
-
-
 
