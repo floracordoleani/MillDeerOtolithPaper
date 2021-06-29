@@ -667,8 +667,8 @@ tuk15
 plot(tuk15)
 
 # t-test for growth comparison during the first 30 days
-datattest <- growth30_avg[-which(growth30_avg$Strat=='EarlyOutmigrant'),]
-t.test(datattest$mean_growth ~ datattest$Strat)
+datatest <- growth30_avg[-which(growth30_avg$Strat=='EarlyOutmigrant'),]
+wilcox.test(mean_growth ~ Strat, data = datatest)
 
 # Early-life salmon growth across life history types (Paper Figure 4)--------------------------------
 p4a <- ggplot(data=growth15_avg[growth15_avg$inc_exit>=15,],aes(x=inc_exit,y=mean_growth)) + 
