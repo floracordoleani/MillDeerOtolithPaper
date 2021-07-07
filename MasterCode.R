@@ -666,7 +666,7 @@ tuk15
 
 plot(tuk15)
 
-# t-test for growth comparison during the first 30 days
+# wilcoxon test for growth comparison during the first 30 days
 datatest <- growth30_avg[-which(growth30_avg$Strat=='EarlyOutmigrant'),]
 wilcox.test(mean_growth ~ Strat, data = datatest)
 
