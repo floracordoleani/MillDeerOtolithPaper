@@ -105,24 +105,25 @@ profile1 <- ggplot() +
   annotate(geom="text",x=70, y=0.7097,label="Incubation", 
            col="black", size = 7,fontface="bold")+
   geom_line(data=SubsetEarly ,aes(distance,otoSr,group=sample),col="grey50" ,lwd=1,alpha=0.6) + 
-  geom_line(data=earlyexample,aes(distance,otoSr,group=sample),col="black")+
-  geom_point(data=earlyexample,aes(distance,otoSr,group=sample),col="black")+
+  geom_line(data=earlyexample,aes(distance,otoSr,group=sample),col="black",size=1.3)+
+  geom_point(data=earlyexample,aes(distance,otoSr,group=sample),col="black",size=2)+
   geom_segment(data=earlyexample,aes(x = distance, y = otoSr - 1.96*SE1, 
-                                        xend = distance, yend =  otoSr + 1.96*SE1),col="black")+
+                                        xend = distance, yend =  otoSr + 1.96*SE1),
+               col="black",lwd = 1)+
   geom_segment(aes(x=200,xend=+Inf,y=0.7049647,yend=0.7049647), 
-               col="black", lty="dashed",lwd = 0.8)+
+               col="black", lty="dashed",lwd = 1.3)+
   geom_segment(aes(x=200,xend=+Inf,y=0.7061,yend=0.7061), 
-               col="black", lty="dashed",lwd = 0.8)+
+               col="black", lty="dashed",lwd = 1.3)+
   geom_segment(aes(x=200,xend=+Inf,y= 0.7078,yend= 0.7078), 
-               col="black", lty="dashed",lwd = 0.8)+
-  geom_vline(xintercept = 200,col="black", lty="dashed",lwd = 0.8)
+               col="black", lty="dashed",lwd = 1.3)+
+  geom_vline(xintercept = 200,col="black", lty="dashed",lwd = 1.3)
 
 profile1
 
 profile2 <- ggplot() +
   labs(y=expression(paste({}^"87","Sr/",{}^"86","Sr"))) + xlab("")+
   ggtitle('Intermediate migrant') + 
-  scale_x_continuous(limits=c(0,1200), breaks=seq(0,1200,200))+ #
+  scale_x_continuous(limits=c(0,1200), breaks=seq(0,1200,200))+ 
   scale_y_continuous(limits=c(0.7035,0.710), breaks=seq(0.704,0.710,0.001))+
   theme_bw()+
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
@@ -131,16 +132,16 @@ profile2 <- ggplot() +
         plot.title = element_text(face = "bold"))+
   geom_rect(data= position_trib, inherit.aes = FALSE,
             aes(xmin=-Inf, xmax=+Inf, ymin=y[1], ymax=y[2]), 
-            fill="#001B87", alpha=0.8)+ # "#F2AD00" "#FCD16B"
+            fill="#001B87", alpha=0.8)+ 
   geom_rect(data= position_sac, inherit.aes = FALSE,
             aes(xmin=-Inf, xmax=+Inf, ymin=y[1], ymax=y[2]), 
-            fill= "#0064D6",alpha=0.5)+ # "#D1362F" ",#c03728"
+            fill= "#0064D6",alpha=0.5)+
   geom_rect(data= position_delta, inherit.aes = FALSE,
             aes(xmin=-Inf, xmax=+Inf, ymin=y[1], ymax=y[2]), 
-            fill="#00A6D7", alpha=0.2)+ # "#0066CC"   "#2166AC"
+            fill="#00A6D7", alpha=0.2)+ 
   geom_rect(data= position_bay, inherit.aes = FALSE,
             aes(xmin=-Inf, xmax=+Inf, ymin=y[1], ymax=y[2]), 
-            fill="#C1E6E0", alpha=1)+# "#009966" "#3c5e27"
+            fill="#C1E6E0", alpha=1)+
   geom_rect(data= position_incub, inherit.aes = FALSE, 
             aes(xmin=-Inf, xmax=200,ymin=0.7035, ymax=0.710), 
             fill="lightgrey", alpha=0.8)+
@@ -153,17 +154,18 @@ profile2 <- ggplot() +
   annotate(geom="text",x=70, y=0.7097,label="Incubation", 
            col="black", size = 7,fontface="bold")+
   geom_line(data=SubsetIntermediate,aes(distance,otoSr,group=sample),col="grey50" ,lwd=1,alpha=0.6) + #"grey30"
-  geom_line(data=intermediateexample ,aes(distance,otoSr,group=sample),col="black")+
-  geom_point(data=intermediateexample,aes(distance,otoSr,group=sample),col="black")+
+  geom_line(data=intermediateexample ,aes(distance,otoSr,group=sample),col="black",size=1.3)+
+  geom_point(data=intermediateexample,aes(distance,otoSr,group=sample),col="black",size=2)+
   geom_segment(data=intermediateexample,aes(x = distance, y = otoSr - 1.96*SE1, 
-                                                xend = distance, yend =  otoSr + 1.96*SE1),col="black")+
+                                                xend = distance, yend =  otoSr + 1.96*SE1),
+               col="black",lwd = 1)+
   geom_segment(aes(x=200,xend=+Inf,y=0.7049647,yend=0.7049647), 
-               col="black", lty="dashed",lwd = 0.8)+
+               col="black", lty="dashed",lwd = 1.3)+
   geom_segment(aes(x=200,xend=+Inf,y=0.7061,yend=0.7061), 
-               col="black", lty="dashed",lwd = 0.8)+
+               col="black", lty="dashed",lwd = 1.3)+
   geom_segment(aes(x=200,xend=+Inf,y= 0.7078,yend= 0.7078), 
-               col="black", lty="dashed",lwd = 0.8)+
-  geom_vline(xintercept = 200,col="black", lty="dashed",lwd = 0.8)
+               col="black", lty="dashed",lwd = 1.3)+
+  geom_vline(xintercept = 200,col="black", lty="dashed",lwd = 1.3)
 
 profile2
 
@@ -202,24 +204,25 @@ profile3 <- ggplot() +
   annotate(geom="text",x=70, y=0.7097,label="Incubation", 
            col="black", size = 7,fontface="bold")+
   geom_line(data=SubsetLate,aes(distance,otoSr,group=sample),col="grey50" ,lwd=1,alpha=0.6) + 
-  geom_line(data=lateexample,aes(distance,otoSr,group=sample),col="black")+
-  geom_point(data=lateexample,aes(distance,otoSr,group=sample),col="black")+
+  geom_line(data=lateexample,aes(distance,otoSr,group=sample),col="black",size=1.3)+
+  geom_point(data=lateexample,aes(distance,otoSr,group=sample),col="black",size=2)+
   geom_segment(data=lateexample,aes(x = distance, y = otoSr - 1.96*SE1, 
-                                       xend = distance, yend =  otoSr + 1.96*SE1),col="black")+
+                                    xend = distance, yend =  otoSr + 1.96*SE1),
+               col="black",lwd = 1)+
   geom_segment(aes(x=200,xend=+Inf,y=0.7049647,yend=0.7049647), 
-               col="black", lty="dashed",lwd = 0.8)+
+               col="black", lty="dashed",lwd = 1.3)+
   geom_segment(aes(x=200,xend=+Inf,y=0.7061,yend=0.7061), 
-               col="black", lty="dashed",lwd = 0.8)+
+               col="black", lty="dashed",lwd = 1.3)+
   geom_segment(aes(x=200,xend=+Inf,y= 0.7078,yend= 0.7078), 
-               col="black", lty="dashed",lwd = 0.8)+
-  geom_vline(xintercept = 200,col="black", lty="dashed",lwd = 0.8)
+               col="black", lty="dashed",lwd = 1.3)+
+  geom_vline(xintercept = 200,col="black", lty="dashed",lwd = 1.3)
 
 profile3
 
 ### Combine profiles
 
 p1 <- ggarrange(nrow=3,profile1, profile2,profile3,
-          labels = c("a","b","c"),
+          labels = c("b","c","d"),
           font.label=list(size = 30,color="black"))
 
 png("Figures/Figure1.png", 
