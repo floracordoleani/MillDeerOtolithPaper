@@ -232,6 +232,18 @@ p1
 
 dev.off()
 
+
+p1 <- ggarrange(nrow=3,profile1, profile2,profile3,
+                labels = c("b","c","d"),
+                font.label=list(size = 10,color="black"))
+
+png("Figures/Figure1.png", 
+    family = "sans serif", width =9, height= 18, units = "in", res =200)
+
+p1
+
+dev.off()
+
 #----------------------------------------------------------------------#
 # Otolith radius (OR) distance at Natal and Freshwater Exit Estimation #
 #----------------------------------------------------------------------#
@@ -360,6 +372,9 @@ FWExitdata_complete <- merge(x=FWExitdata_complete,y=Clusterdata,by="sample")
 # Change object category for future analysis
 FWExitdata_complete$reartype <- as.factor(FWExitdata_complete$reartype)
 FWExitdata_complete$FWExit_IncNum <- as.numeric(FWExitdata_complete$FWExit_IncNum)
+
+# FWExitdata_complete <- merge(x=FWExitdata,y=NatalExitdata_complete,by="sample")
+# write.csv(FWExitdata_complete,'Data.out/NatalFWExitdata_MDC.csv',row.names=FALSE)
 
 ### FW Exit statistics for manuscript
 # Evaluating OR mean and sd at FW exit for each rearing strategy
@@ -496,7 +511,7 @@ p2
 dev.off()
 
 # Migrant sizes and life history diversity across years (Paper figure 3) -----------------------------------------------------------------
-# Combine natal and freshwater exit dataframes
+# Combine natal and freshwater exit data frames
 NatalFW_data <- merge(NatalExitdata_complete,FWExitdata_complete,by=c("sample","reartype","year"))
 
 # Add corresponding emigrations years for each adult return year
@@ -819,7 +834,7 @@ FWExitFL.summary <- FWExitdata_complete %>% group_by(reartype) %>%
                                      Min = round(min(FWExitFL, na.rm=TRUE)),
                                      Sd = round(sd(FWExitFL, na.rm=TRUE)))
 
-# SUpplementary Information Figure S2 -------------------------------------------------------------
+# Supplementary Information Figure S2 -------------------------------------------------------------
 
 pS2a <- ggplot() + geom_point(data = calib,aes(OR,FL),col="black")+
   geom_point(data=NatalExitdata_complete,aes(NatalExit_OR_final,NatalExitFL),col='red',size=2)+
